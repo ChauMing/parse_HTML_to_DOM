@@ -1,11 +1,22 @@
 {
   "name": "htmltree",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "GiantMing",
-  "license": "WTFPL"
+  "license": "WTFPL",
+  "keywords": [
+    "parsing"
+  ],
+  "description": "html parsing",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GiantMing/HTMLtree.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GiantMing/HTMLtree/issues"
+  },
+  "homepage": "https://github.com/GiantMing/HTMLtree#readme"
 }
