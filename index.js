@@ -1,5 +1,6 @@
 'use strict';
 
+console.time('time');
 var html = `
 
 <html>
@@ -240,155 +241,19 @@ else
 
 
 
-let tagReg = /<(\/?[a-z]+).*?>/g;
-let tag = '';
-let treeArr = [];
-while (tag = tagReg.exec(html)) {
-    let obj = {
-        tag: tag[0],
-        tagName: tag[1],
-        pos: tagReg.lastIndex,
-        length:  tag[0].length,
-    }
-    treeArr.push(obj);
-}
 
 
-const isSingleTag = (tagName) => ['img', 'input', 'br', 'meta'].some((item)=>item===tagName);  // 判断是否是单标签
-const isCloseTag = (tagName) => /\//.test(tagName);                                            // 判断是否是结束标签
-
-
-function Node(info) {
-    this.prevTag = info.tag;       // 开始标签 <div class="container"> 酱紫
-    this.tagName = info.tagName;   // 标签名  div, span  any more...
-
-    this.closeTag = null;                 // 闭合标签  </div>  </span>酱紫
-    this.childrens = null;                  // 子元素,  叶子,子树
-
-    this.selfStartPos = info.pos - info.tag.length;                       // 自己的完整标签开始  包含开始标签开始位置
-    this.selfEndPos;                         // 自己的完整标签结束  包含结束标签的结束位置
-    this.innerHTMLStartPos = info.pos;       // innerHTML的开始位置
-    this.innerHTMLEndPos = 0;                // innerHTML的结束位置
-
-    this.parent = info.parent;               // 父元素
-
-    this.innerHTML = '';
-    this.selfHTML = '';
-
-
-    this.attributes = {};
-    let nodeSelf = this;
-
-    let reg  = /<[a-z]+\s([^>]+)?>/g;
-
-    let att = reg.exec(this.prevTag)
-    if (att !== null) {
-        let attStr = att[1].trim();
-        let attArr = attStr.split(' ');
-        
-        attArr.forEach(function(item, index) {
-            let fuck = item.split('=');
-            let attr = fuck[0];
-            let value = fuck[1];
-
-                nodeSelf.attributes[attr] = value ? value.replace(/"/g, '') : '';
-
-        });
-    }
+let parseHTML = require('./lib/parse.js');
 
 
 
-}
+let document = parseHTML(html);
+
+let tr = document.getElementsByTagName('script');
+
+
+tr.forEach(item=>console.log(item));
 
 
 
-
-Node.prototype = {
-    constrctor: 'Node',
-    close: function(info) {
-        this.selfEndPos = info.pos;
-        this.innerHTMLEndPos = info.pos - info.tag.length;
-
-
-        this.innerHTML = html.slice(this.innerHTMLStartPos, this.innerHTMLEndPos);
-        this.selfHTML = html.slice(this.selfStartPos, this.selfEndPos);
-        // console.log('info ' + info.tag.length);
-        // console.log('tagNameL: '+ this.tagName);
-        // console.log('innerHTMLStartPos: ' + this.innerHTMLStartPos);
-        // console.log('innerHTMLEndPos  ' + this.innerHTMLEndPos);
-        // console.log('selfStartPos: '+ this.selfStartPos);
-        // console.log('selfEndPos: '+ this.selfEndPos);
-
-        // console.log('html: '+ html.slice(this.innerHTMLStartPos, this.innerHTMLEndPos));
-        // console.log('selfHTML: '+ this.selfHTML);
-        this.closeTag = info.tag;
-
-    },
-    appendChild: function(child) {
-        if(child.constrctor !== 'Node') {
-            console.error("node must be a Node instance");
-        }
-        if(!Array.isArray(this.childrens)) {
-            this.childrens = [];
-        }
-        child.index = this.childrens.length;
-        this.childrens.push(child);
-    },
-    getElementById: function (id) {
-        let obj = {};
-        function prevLoop(node) {
-            if(node.attributes['id'] === id) obj = node;
-            if(node.childrens === null) return;
-            node.childrens.forEach((item)=>{
-                prevLoop(item);
-            })
-        }
-        prevLoop(this);
-        return obj;
-    }
-
-}
-
-var rootNode = new Node({
-    tagName: 'root',
-    pos: 0,
-    tag: '',
-    parent: null
-});
-
-let parentPointer = rootNode;
-
-treeArr.forEach(function(tag) {
-    if(isSingleTag(tag.tagName)) {
-        let node = new Node(tag);
-        parentPointer.appendChild(node);
-    } else if (isCloseTag(tag.tagName)) {
-        parentPointer.close(tag);
-        parentPointer = parentPointer.parent;
-    } else {
-        tag.parent = parentPointer;
-        let node = new Node(tag);
-        parentPointer.appendChild(node);
-        parentPointer = node;
-        
-    }
-
-});
-
-
-// console.log(rootNode);
-
-// function prevLoop(root) {
-//     // console.log(root.tagName);
-//     if (root.childrens === null) {
-//         return;
-//     }
-//     root.childrens.forEach(function(item) {
-//         prevLoop(item);
-//     });
-// }
-
-// prevLoop(rootNode);
-
-console.log(rootNode.getElementById('id').innerHTML);
-// console.log(html.slice(142, 150));
+console.timeEnd('time');
